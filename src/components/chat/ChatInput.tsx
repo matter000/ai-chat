@@ -577,7 +577,7 @@ export function ChatInput({ onSend, onStop, streaming, placeholder }: Props) {
           />
 
           {(attachments.length > 0 || text.length > 0) && (
-            <span className="ml-0.5 text-[10px] text-ink-400 dark:text-dark-muted tabular-nums">
+            <span className="absolute bottom-3 right-16 text-[10px] text-ink-400 dark:text-dark-muted tabular-nums pointer-events-none">
               {attachments.length > 0 && `${attachments.length} 个附件 · `}
               {text.length > 0 && `${text.length} 字`}
             </span>

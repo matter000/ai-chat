@@ -1,0 +1,208 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  color-scheme: light dark;
+  --shadow-color: 15 17 21;
+}
+
+html, body, #root {
+  height: 100%;
+  margin: 0;
+}
+
+body {
+  font-family: theme('fontFamily.sans');
+  font-size: 14px;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+}
+
+/* 滚动条：克制风格 */
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb {
+  background: rgba(31, 35, 40, 0.12);
+  border-radius: 3px;
+}
+::-webkit-scrollbar-thumb:hover { background: rgba(31, 35, 40, 0.22); }
+.dark ::-webkit-scrollbar-thumb { background: rgba(230, 232, 235, 0.10); }
+.dark ::-webkit-scrollbar-thumb:hover { background: rgba(230, 232, 235, 0.18); }
+
+/* 焦点环：克制风格，只在必要控件上显示 */
+/* 默认隐藏原生 outline 和全局 ring —— 由各组件自己用更细致的方式提示 */
+*:focus { outline: none; }
+*:focus-visible {
+  outline: none;
+  box-shadow: none;
+}
+
+/* 给"会让人迷茫的控件"做细 ring：input、button、select、textarea 之外的链接 */
+a:focus-visible,
+button:focus-visible,
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible {
+  /* 不画 ring / outline —— 改成由父容器的 shadow / 边框色变深提示 */
+  outline: none;
+  box-shadow: none;
+}
+
+/* 让输入框高度跟内容走，单行时 placeholder 垂直居中 */
+.field-sizing-content {
+  field-sizing: content;
+}
+
+/* ===== Markdown 渲染样式 (Claude 风格 · 极简) ===== */
+.md {
+  font-size: 14.5px;
+  line-height: 1.7;
+  word-break: break-word;
+  color: theme('colors.ink.900');
+}
+.dark .md { color: theme('colors.dark.ink'); }
+
+.md > * + * { margin-top: 12px; }
+.md > *:first-child { margin-top: 0; }
+.md > *:last-child { margin-bottom: 0; }
+
+.md p { margin: 0; }
+.md strong { font-weight: 600; color: inherit; }
+.md em { font-style: italic; }
+.md a {
+  color: theme('colors.accent.DEFAULT');
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+.md a:hover { color: theme('colors.accent.hover'); }
+
+.md h1, .md h2, .md h3, .md h4 {
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  color: theme('colors.ink.900');
+  margin: 16px 0 6px;
+}
+.dark .md h1, .dark .md h2, .dark .md h3, .dark .md h4 { color: theme('colors.dark.ink'); }
+.md h1 { font-size: 1.35em; }
+.md h2 { font-size: 1.2em; }
+.md h3 { font-size: 1.08em; }
+.md h4 { font-size: 1em; }
+
+.md ul, .md ol { padding-left: 1.4em; margin: 0; }
+.md ul { list-style: disc; }
+.md ol { list-style: decimal; }
+.md li { margin: 3px 0; }
+.md li > p { margin: 0; }
+
+.md blockquote {
+  margin: 0;
+  padding: 4px 12px;
+  border-left: 3px solid theme('colors.ink.200');
+  color: theme('colors.ink.500');
+}
+.dark .md blockquote { border-left-color: theme('colors.dark.border'); color: theme('colors.dark.muted'); }
+
+.md hr {
+  border: 0;
+  height: 1px;
+  background: theme('colors.ink.200');
+  margin: 16px 0;
+}
+.dark .md hr { background: theme('colors.dark.border'); }
+
+.md table {
+  border-collapse: collapse;
+  width: 100%;
+  font-size: 13px;
+}
+.md th, .md td {
+  border: 1px solid theme('colors.ink.200');
+  padding: 6px 10px;
+  text-align: left;
+}
+.dark .md th, .dark .md td { border-color: theme('colors.dark.border'); }
+.md th { background: theme('colors.ink.50'); font-weight: 600; }
+.dark .md th { background: theme('colors.dark.subtle'); }
+
+/* 行内代码 */
+.md code {
+  font-family: theme('fontFamily.mono');
+  font-size: 0.88em;
+  background: theme('colors.ink.100');
+  padding: 1px 5px;
+  border-radius: 4px;
+  color: theme('colors.ink.900');
+}
+.dark .md code {
+  background: theme('colors.dark.subtle');
+  color: theme('colors.dark.ink');
+}
+
+/* 代码块 */
+.md pre {
+  background: theme('colors.ink.50');
+  padding: 14px 16px;
+  border-radius: 10px;
+  overflow-x: auto;
+  font-size: 13px;
+  line-height: 1.6;
+  position: relative;
+  border: 1px solid theme('colors.ink.200');
+}
+.dark .md pre {
+  background: #0B0D11;
+  border-color: theme('colors.dark.border');
+}
+.md pre code {
+  background: transparent;
+  padding: 0;
+  font-size: inherit;
+  color: theme('colors.ink.900');
+}
+.dark .md pre code { color: theme('colors.dark.ink'); }
+
+/* highlight.js (light) */
+.hljs-keyword, .hljs-selector-tag, .hljs-built_in, .hljs-section,
+.hljs-link, .hljs-meta, .hljs-tag { color: #8250DF; }
+.hljs-string, .hljs-attr, .hljs-symbol, .hljs-bullet, .hljs-quote { color: #0A6C3E; }
+.hljs-comment, .hljs-quote { color: #8F959E; font-style: italic; }
+.hljs-number, .hljs-literal, .hljs-variable, .hljs-template-variable { color: #0550AE; }
+.hljs-title, .hljs-name { color: #B3541E; }
+.hljs-type, .hljs-class .hljs-title { color: #0550AE; }
+.hljs-emphasis { font-style: italic; }
+.hljs-strong { font-weight: 600; }
+.hljs-deletion { color: #B91C1C; background: #FEE2E2; }
+.hljs-addition { color: #047857; background: #D1FAE5; }
+
+/* highlight.js (dark) */
+.dark .hljs-keyword, .dark .hljs-selector-tag, .dark .hljs-built_in, .dark .hljs-section,
+.dark .hljs-link, .dark .hljs-meta, .dark .hljs-tag { color: #FF7B72; }
+.dark .hljs-string, .dark .hljs-attr, .dark .hljs-symbol, .dark .hljs-bullet, .dark .hljs-quote { color: #A5D6FF; }
+.dark .hljs-comment { color: #8B949E; }
+.dark .hljs-number, .dark .hljs-literal, .dark .hljs-variable, .dark .hljs-template-variable { color: #79C0FF; }
+.dark .hljs-title, .dark .hljs-name { color: #D2A8FF; }
+.dark .hljs-type, .dark .hljs-class .hljs-title { color: #79C0FF; }
+
+/* 打字机光标 */
+.streaming-cursor::after {
+  content: '▍';
+  margin-left: 1px;
+  color: theme('colors.accent.DEFAULT');
+  animation: blink 1.1s steps(1) infinite;
+  font-weight: 400;
+}
+@keyframes blink {
+  50% { opacity: 0; }
+}
+
+/* 选中样式 */
+::selection {
+  background: theme('colors.accent.soft');
+  color: theme('colors.accent.hover');
+}
+.dark ::selection {
+  background: rgba(37, 99, 235, 0.25);
+  color: theme('colors.dark.ink');
+}

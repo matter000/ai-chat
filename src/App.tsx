@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Menu, PanelLeftOpen } from 'lucide-react';
+import { Menu, PanelLeftOpen, PanelLeft, GripVertical, ChevronsRight, ChevronsLeft } from 'lucide-react';
 import { nanoid } from 'nanoid';
 import { Sidebar } from '@/components/sidebar/Sidebar';
 import { ChatView } from '@/components/chat/ChatView';
@@ -12,7 +12,8 @@ import { GlobalSearch } from '@/components/GlobalSearch';
 import { UserCenter } from '@/components/settings/UserCenter';
 import { Button } from '@/components/ui/Button';
 import { clsx } from 'clsx';
-import { useUIStore, applyTheme } from '@/store/uiStore';
+import { useUIStore } from '@/store/uiStore';
+import { applyTheme } from '@/store/uiStore';
 import { providerRepo, conversationRepo, userRepo } from '@/db';
 import { useShortcuts } from '@/hooks/useShortcuts';
 import { useLockStore } from '@/store/lockStore';
@@ -29,8 +30,14 @@ export default function App() {
   const [authNeeded, setAuthNeeded] = useState<boolean | null>(null);
   const [currentUser, setCurrentUser] = useState<UserProfile | null>(null);
 
-  const sidebarOpen = useUIStore((s) => s.sidebarOpen);
+  const sidebarState = useUIStore((s) => s.sidebarState);
+  const sidebarHover = useUIStore((s) => s.sidebarHover);
+  const setSidebarHover = useUIStore((s) => s.setSidebarHover);
+  const collapseSidebar = useUIStore((s) => s.collapseSidebar);
   const toggleSidebar = useUIStore((s) => s.toggleSidebar);
+  const expandSidebar = useUIStore((s) => s.expandSidebar);
+  // 侧栏的最终显示状态：展开 OR 收起但 hover
+  const sidebarShown = sidebarState === 'expanded' || (sidebarState === 'collapsed' && sidebarHover);
   const openSettings = useUIStore((s) => s.openSettings);
   const theme = useUIStore((s) => s.theme);
   const lockEnabled = useLockStore((s) => s.enabled);
@@ -188,38 +195,54 @@ export default function App() {
 
       <div
         className={clsx(
-          'md:relative absolute inset-y-0 left-0 z-30',
-          'transition-transform duration-200 ease-out',
-          sidebarOpen ? 'translate-x-0' : '-translate-x-full',
+          'md:relative absolute inset-y-0 left-0 z-30 flex',
+          'transition-all duration-200 ease-out',
         )}
+        style={{ width: sidebarShown ? (window.innerWidth < 768 ? '100%' : '256px') : '0px' }}
+        onMouseEnter={() => setSidebarHover(true)}
+        onMouseLeave={() => setSidebarHover(false)}
       >
-        <Sidebar
-          activeId={activeId}
-          onSelect={(id) => {
-            setActiveId(id);
-            if (window.innerWidth < 768) toggleSidebar();
-          }}
-        />
+        <div
+          className={clsx(
+            'h-full transition-opacity duration-200',
+            sidebarShown ? 'opacity-100 w-full' : 'opacity-0 w-0 overflow-hidden pointer-events-none',
+          )}
+        >
+          <Sidebar
+            activeId={activeId}
+            onSelect={(id) => {
+              setActiveId(id);
+              if (window.innerWidth < 768) collapseSidebar();
+            }}
+          />
+        </div>
       </div>
 
-      {sidebarOpen && (
+      {/* 收起时的拉手条 */}
+      {sidebarState === 'collapsed' && (
+        <div
+          onMouseEnter={() => setSidebarHover(true)}
+          onMouseLeave={() => setSidebarHover(false)}
+          className="hidden md:flex absolute left-0 top-0 bottom-0 w-3 z-20 items-center justify-center cursor-pointer hover:bg-accent/10 transition-colors group"
+          onClick={expandSidebar}
+          title="点击或 hover 展开侧栏"
+        >
+          <div className="flex flex-col items-center gap-2 px-1 py-3 rounded-r-md group-hover:bg-accent/20">
+            <ChevronsRight size={12} className="text-ink-400 group-hover:text-accent" />
+            <GripVertical size={14} className="text-ink-300 group-hover:text-accent" />
+            <ChevronsRight size={12} className="text-ink-400 group-hover:text-accent" />
+          </div>
+        </div>
+      )}
+
+      {sidebarShown && (
         <div
           onClick={toggleSidebar}
           className="md:hidden fixed inset-0 z-20 bg-black/30 backdrop-blur-[1px]"
         />
       )}
 
-      {!sidebarOpen && (
-        <button
-          type="button"
-          onClick={toggleSidebar}
-          aria-label="展开侧栏"
-          title="展开侧栏"
-          className="hidden md:flex absolute left-2 top-2 z-20 h-8 w-8 items-center justify-center rounded-md bg-white dark:bg-dark-panel text-ink-500 dark:text-dark-muted border border-surface-border dark:border-dark-border shadow-sm hover:bg-ink-50 dark:hover:bg-dark-subtle"
-        >
-          <PanelLeftOpen size={16} />
-        </button>
-      )}
+
 
       <main className="flex min-w-0 flex-1 flex-col">
         <ChatView

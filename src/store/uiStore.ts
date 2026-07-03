@@ -1,11 +1,18 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 
+export type SidebarState = 'expanded' | 'collapsed';
+
 interface UIState {
-  sidebarOpen: boolean;
+  sidebarState: SidebarState;
   settingsOpen: boolean;
   theme: 'light' | 'dark' | 'system';
+  /** 鼠标 hover 屏幕左边缘时短暂展开（不是持久状态，只是临时显示） */
+  sidebarHover: boolean;
   toggleSidebar: () => void;
+  expandSidebar: () => void;
+  collapseSidebar: () => void;
+  setSidebarHover: (v: boolean) => void;
   openSettings: () => void;
   closeSettings: () => void;
   setTheme: (t: 'light' | 'dark' | 'system') => void;
@@ -14,22 +21,29 @@ interface UIState {
 export const useUIStore = create<UIState>()(
   persist(
     (set) => ({
-      sidebarOpen: true,
+      sidebarState: 'expanded',
       settingsOpen: false,
       theme: 'system',
-      toggleSidebar: () => set((s) => ({ sidebarOpen: !s.sidebarOpen })),
+      sidebarHover: false,
+      toggleSidebar: () =>
+        set((s) => ({
+          sidebarState: s.sidebarState === 'expanded' ? 'collapsed' : 'expanded',
+        })),
+      expandSidebar: () => set({ sidebarState: 'expanded' }),
+      collapseSidebar: () => set({ sidebarState: 'collapsed' }),
+      setSidebarHover: (v) => set({ sidebarHover: v }),
       openSettings: () => set({ settingsOpen: true }),
       closeSettings: () => set({ settingsOpen: false }),
       setTheme: (theme) => set({ theme }),
     }),
     {
       name: 'ai-chat-ui',
-      partialize: (s) => ({ theme: s.theme, sidebarOpen: s.sidebarOpen }),
+      partialize: (s) => ({ theme: s.theme, sidebarState: s.sidebarState }),
     },
   ),
 );
 
-// 把 theme 同步到 <html> 的 class
+// 主题同步函数：把 theme 状态应用到 <html> 的 dark class
 export function applyTheme(theme: 'light' | 'dark' | 'system') {
   const root = document.documentElement;
   const mql = window.matchMedia('(prefers-color-scheme: dark)');

@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { Plus, Settings, Trash2, Pin, PinOff, Search, Check, X, Pencil, MessageSquare, Sun, Moon, Monitor, User, PanelLeftClose } from 'lucide-react';
+import { Plus, Settings, Trash2, Pin, PinOff, Search, Check, X, Pencil, MessageSquare, Sun, Moon, Monitor, User } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
 import { conversationRepo, userRepo } from '@/db';
 import { nanoid } from 'nanoid';
@@ -7,7 +7,6 @@ import type { Conversation } from '@/types';
 import { useUIStore } from '@/store/uiStore';
 import { getAuthState } from '@/store/userStore';
 import { useLiveQuery } from 'dexie-react-hooks';
-import { useSidebarWidth } from '@/hooks/useSidebarWidth';
 import { clsx } from 'clsx';
 
 export function Sidebar({
@@ -22,7 +21,7 @@ export function Sidebar({
   const [titleDraft, setTitleDraft] = useState('');
   const editInputRef = useRef<HTMLInputElement>(null);
   const openSettings = useUIStore((s) => s.openSettings);
-  const toggleSidebar = useUIStore((s) => s.toggleSidebar);
+  const collapseSidebar = useUIStore((s) => s.collapseSidebar);
 
   const theme = useUIStore((s) => s.theme);
   const setTheme = useUIStore((s) => s.setTheme);
@@ -33,7 +32,7 @@ export function Sidebar({
     { value: 'system' as const, icon: Monitor, label: '跟随系统' },
   ];
   const currentTheme = themeOptions.find((o) => o.value === theme) ?? themeOptions[2];
-  const { width: sidebarWidth, onMouseDown: onResizeStart } = useSidebarWidth();
+
 
   // 当前用户信息
   const auth = getAuthState();
@@ -115,25 +114,17 @@ export function Sidebar({
   }, [conversations?.length]);
 
   return (
-    <aside
-      style={{ width: sidebarWidth }}
-      className="relative flex h-full shrink-0 flex-col bg-surface-alt dark:bg-dark-panel border-r border-surface-border dark:border-dark-border"
-    >
-      <div
-        onMouseDown={onResizeStart}
-        className="absolute right-0 top-0 bottom-0 w-1.5 cursor-col-resize hover:bg-accent/30 transition-colors z-10"
-        title="拖动调整宽度"
-      />
+    <aside className="relative flex h-full w-full flex-col bg-surface-alt dark:bg-dark-panel border-r border-surface-border dark:border-dark-border">
       {/* Logo */}
       <div className="flex items-center justify-between px-3 h-12 shrink-0 gap-1">
         <button
           type="button"
-          onClick={toggleSidebar}
+          onClick={collapseSidebar}
           aria-label="收起侧栏"
           title="收起侧栏"
           className="flex h-7 w-7 items-center justify-center rounded-md text-ink-500 dark:text-dark-muted hover:bg-ink-100 dark:hover:bg-dark-subtle transition-colors"
         >
-          <PanelLeftClose size={15} />
+
         </button>
         <div className="flex items-center gap-2 min-w-0">
           <div className="h-6 w-6 rounded-md bg-gradient-to-br from-accent to-blue-500 grid place-items-center text-white text-[11px] font-bold shrink-0">

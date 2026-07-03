@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Menu } from 'lucide-react';
+import { Menu, PanelLeftOpen } from 'lucide-react';
 import { nanoid } from 'nanoid';
 import { Sidebar } from '@/components/sidebar/Sidebar';
 import { ChatView } from '@/components/chat/ChatView';
@@ -188,9 +188,9 @@ export default function App() {
 
       <div
         className={clsx(
-          'md:relative md:translate-x-0 absolute inset-y-0 left-0 z-30',
+          'md:relative absolute inset-y-0 left-0 z-30',
           'transition-transform duration-200 ease-out',
-          sidebarOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0',
+          sidebarOpen ? 'translate-x-0' : '-translate-x-full',
         )}
       >
         <Sidebar
@@ -207,6 +207,18 @@ export default function App() {
           onClick={toggleSidebar}
           className="md:hidden fixed inset-0 z-20 bg-black/30 backdrop-blur-[1px]"
         />
+      )}
+
+      {!sidebarOpen && (
+        <button
+          type="button"
+          onClick={toggleSidebar}
+          aria-label="展开侧栏"
+          title="展开侧栏"
+          className="hidden md:flex absolute left-2 top-2 z-20 h-8 w-8 items-center justify-center rounded-md bg-white dark:bg-dark-panel text-ink-500 dark:text-dark-muted border border-surface-border dark:border-dark-border shadow-sm hover:bg-ink-50 dark:hover:bg-dark-subtle"
+        >
+          <PanelLeftOpen size={16} />
+        </button>
       )}
 
       <main className="flex min-w-0 flex-1 flex-col">

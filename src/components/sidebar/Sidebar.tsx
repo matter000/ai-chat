@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { Plus, Settings, Trash2, Pin, PinOff, Search, Check, X, Pencil, MessageSquare, Sun, Moon, Monitor, User } from 'lucide-react';
+import { Plus, Settings, Trash2, Pin, PinOff, Search, Check, X, Pencil, MessageSquare, Sun, Moon, Monitor, User, PanelLeftClose } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
 import { conversationRepo, userRepo } from '@/db';
 import { nanoid } from 'nanoid';
@@ -22,6 +22,7 @@ export function Sidebar({
   const [titleDraft, setTitleDraft] = useState('');
   const editInputRef = useRef<HTMLInputElement>(null);
   const openSettings = useUIStore((s) => s.openSettings);
+  const toggleSidebar = useUIStore((s) => s.toggleSidebar);
 
   const theme = useUIStore((s) => s.theme);
   const setTheme = useUIStore((s) => s.setTheme);
@@ -124,12 +125,21 @@ export function Sidebar({
         title="拖动调整宽度"
       />
       {/* Logo */}
-      <div className="flex items-center justify-between px-4 h-12 shrink-0">
-        <div className="flex items-center gap-2">
-          <div className="h-6 w-6 rounded-md bg-gradient-to-br from-accent to-blue-500 grid place-items-center text-white text-[11px] font-bold">
+      <div className="flex items-center justify-between px-3 h-12 shrink-0 gap-1">
+        <button
+          type="button"
+          onClick={toggleSidebar}
+          aria-label="收起侧栏"
+          title="收起侧栏"
+          className="flex h-7 w-7 items-center justify-center rounded-md text-ink-500 dark:text-dark-muted hover:bg-ink-100 dark:hover:bg-dark-subtle transition-colors"
+        >
+          <PanelLeftClose size={15} />
+        </button>
+        <div className="flex items-center gap-2 min-w-0">
+          <div className="h-6 w-6 rounded-md bg-gradient-to-br from-accent to-blue-500 grid place-items-center text-white text-[11px] font-bold shrink-0">
             AI
           </div>
-          <span className="text-sm font-semibold tracking-tight">AI Chat</span>
+          <span className="text-sm font-semibold tracking-tight truncate">AI Chat</span>
         </div>
         <Button size="icon" variant="ghost" onClick={openSettings} aria-label="设置">
           <Settings size={15} />

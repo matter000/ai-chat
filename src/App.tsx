@@ -55,6 +55,19 @@ export default function App() {
         if (user) {
           setCurrentUser(user);
           setAuthNeeded(false);
+          // 自动确保至少有一个会话：没有就建一个空白会话
+          const list = await conversationRepo.list();
+          if (list.length === 0) {
+            const now = Date.now();
+            await conversationRepo.create({
+              id: nanoid(),
+              title: '新会话',
+              params: { temperature: 0.7 },
+              pinned: false,
+              createdAt: now,
+              updatedAt: now,
+            });
+          }
           return;
         }
       }

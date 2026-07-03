@@ -12,6 +12,7 @@ import { Button } from '@/components/ui/Button';
 import { EmptyState } from '@/components/ui/EmptyState';
 import { useLockStore } from '@/store/lockStore';
 import { exportConversationAsMarkdown, downloadMarkdown } from '@/services/exportMarkdown';
+import { useMessageMaxWidth } from '@/hooks/useMessageMaxWidth';
 
 interface Props {
   conversationId?: string;
@@ -33,6 +34,7 @@ export function ChatView({ conversationId, onOpenSettings, highlightMessageId }:
   );
 
   const providers = useLiveQuery(() => providerRepo.list(), []);
+  const { width: messageMaxWidth, onMouseDown: onResizeMessage } = useMessageMaxWidth();
   // 解锁状态变化时强制重读
   const lockUnlocked = useLockStore((s) => s.unlocked);
   const [tick, setTick] = useState(0);
@@ -513,7 +515,12 @@ export function ChatView({ conversationId, onOpenSettings, highlightMessageId }:
         }}
         className="relative flex-1 overflow-y-auto"
       >
-        <div className="mx-auto max-w-3xl px-6 py-8 flex flex-col gap-6">
+        <div style={{ maxWidth: messageMaxWidth }} className="relative mx-auto w-full px-6 py-8 flex flex-col gap-6">
+          <div
+            onMouseDown={onResizeMessage}
+            title="拖动调整消息宽度"
+            className="absolute top-0 -right-3 bottom-0 w-1.5 cursor-ew-resize hover:bg-accent/30 transition-colors z-10 hidden md:block"
+          />
           {(!messages || messages.length === 0) &&
             (!activeProvider ? (
               <EmptyState

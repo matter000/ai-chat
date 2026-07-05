@@ -1,4 +1,4 @@
-import { useEffect, useState, lazy, Suspense } from 'react';
+import { useEffect, useRef, useState, lazy, Suspense } from 'react';
 import { Menu, GripVertical, ChevronsRight } from 'lucide-react';
 import { nanoid } from 'nanoid';
 import { Sidebar } from '@/components/sidebar/Sidebar';
@@ -48,6 +48,9 @@ export default function App() {
   const lockUnlocked = useLockStore((s) => s.unlocked);
   const refreshLock = useLockStore((s) => s.refresh);
 
+  // 标记刚完成登录，跳过 useEffect 对 authNeeded 的覆盖（修复竞态条件）
+  const skipLockCheckRef = useRef(false);
+
   // 启动时：检查是否需要 AuthScreen
   useEffect(() => {
     (async () => {
@@ -80,6 +83,10 @@ export default function App() {
   }, []);
 
   useEffect(() => {
+    if (skipLockCheckRef.current) {
+      skipLockCheckRef.current = false;
+      return;
+    }
     if (authNeeded === false && isEncryptionEnabled() && !lockUnlocked) {
       setAuthNeeded(true);
     }
@@ -102,11 +109,20 @@ export default function App() {
 
   const handleAuthUnlocked = async (profile: UserProfile, plainPassword: string) => {
     setCurrentUser(profile);
-    setAuthNeeded(false);
+
+    // 尝试用登录密码解锁加密（登录密码与主密码相同的情况下会成功）
     if (isEncryptionEnabled() || hasMasterPassword()) {
-      await unlockWithPassword(plainPassword);
+      try {
+        await unlockWithPassword(plainPassword);
+      } catch {
+        // 解锁失败不阻塞登录，用户可在设置 > 加密面板中手动解锁
+      }
     }
+
+    // 先刷新 lock 状态，再关闭 AuthScreen，避免 useEffect 覆盖
     refreshLock();
+    skipLockCheckRef.current = true;
+    setAuthNeeded(false);
   };
 
   // 监听命令面板派发的事件

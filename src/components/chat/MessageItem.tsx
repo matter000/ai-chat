@@ -166,6 +166,11 @@ export function MessageItem({ message, streaming, onRegenerate, onDelete, onEdit
             isUser ? 'justify-end' : '',
           )}
         >
+          {!isUser && typeof message.tokens === 'number' && message.tokens > 0 && (
+            <span className="text-[10px] text-ink-400 dark:text-dark-muted tabular-nums mr-1">
+              {message.tokens.toLocaleString()} tokens
+            </span>
+          )}
           {!isUser && onRegenerate && (
             <Button size="icon" variant="ghost" onClick={onRegenerate} aria-label="重新生成">
               <RefreshCw size={13} />

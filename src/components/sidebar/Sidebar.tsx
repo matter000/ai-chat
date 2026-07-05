@@ -5,6 +5,7 @@ import { conversationRepo, userRepo } from '@/db';
 import { nanoid } from 'nanoid';
 import type { Conversation } from '@/types';
 import { useUIStore } from '@/store/uiStore';
+import { useConfirmStore } from '@/store/confirmStore';
 import { getAuthState } from '@/store/userStore';
 import { useLiveQuery } from 'dexie-react-hooks';
 import { clsx } from 'clsx';
@@ -22,6 +23,7 @@ export function Sidebar({
   const editInputRef = useRef<HTMLInputElement>(null);
   const openSettings = useUIStore((s) => s.openSettings);
   const collapseSidebar = useUIStore((s) => s.collapseSidebar);
+  const confirmAction = useConfirmStore((s) => s.confirm);
 
   const theme = useUIStore((s) => s.theme);
   const setTheme = useUIStore((s) => s.setTheme);
@@ -68,7 +70,13 @@ export function Sidebar({
 
   const remove = async (id: string, e: React.MouseEvent) => {
     e.stopPropagation();
-    if (!confirm('删除该会话及其全部消息？')) return;
+    const ok = await confirmAction({
+      title: '删除会话',
+      message: '删除该会话及其全部消息？此操作无法撤销。',
+      confirmLabel: '删除',
+      danger: true,
+    });
+    if (!ok) return;
     await conversationRepo.delete(id);
     if (activeId === id) onSelect('');
   };

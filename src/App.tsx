@@ -1,16 +1,13 @@
-import { useEffect, useState } from 'react';
-import { Menu, PanelLeftOpen, PanelLeft, GripVertical, ChevronsRight, ChevronsLeft } from 'lucide-react';
+import { useEffect, useState, lazy, Suspense } from 'react';
+import { Menu, GripVertical, ChevronsRight } from 'lucide-react';
 import { nanoid } from 'nanoid';
 import { Sidebar } from '@/components/sidebar/Sidebar';
 import { ChatView } from '@/components/chat/ChatView';
-import { SettingsPanel } from '@/components/settings/SettingsPanel';
 import { ParamsDrawer } from '@/components/chat/ParamsDrawer';
-import { Onboarding } from '@/components/Onboarding';
-import { CommandPalette } from '@/components/CommandPalette';
 import { AuthScreen } from '@/components/AuthScreen';
-import { GlobalSearch } from '@/components/GlobalSearch';
-import { UserCenter } from '@/components/settings/UserCenter';
 import { Button } from '@/components/ui/Button';
+import { ErrorBoundary } from '@/components/ui/ErrorBoundary';
+import { ConfirmDialog } from '@/components/ui/ConfirmDialog';
 import { clsx } from 'clsx';
 import { useUIStore } from '@/store/uiStore';
 import { applyTheme } from '@/store/uiStore';
@@ -19,6 +16,13 @@ import { useShortcuts } from '@/hooks/useShortcuts';
 import { useLockStore } from '@/store/lockStore';
 import { getAuthState, setAuthState, type UserProfile } from '@/store/userStore';
 import { unlockWithPassword, isEncryptionEnabled, hasMasterPassword, isUnlocked } from '@/services/crypto';
+
+// 懒加载重组件：首屏不加载，按需拆分
+const SettingsPanel = lazy(() => import('@/components/settings/SettingsPanel').then(m => ({ default: m.SettingsPanel })));
+const CommandPalette = lazy(() => import('@/components/CommandPalette').then(m => ({ default: m.CommandPalette })));
+const Onboarding = lazy(() => import('@/components/Onboarding').then(m => ({ default: m.Onboarding })));
+const GlobalSearch = lazy(() => import('@/components/GlobalSearch').then(m => ({ default: m.GlobalSearch })));
+const UserCenter = lazy(() => import('@/components/settings/UserCenter').then(m => ({ default: m.UserCenter })));
 
 export default function App() {
   const [activeId, setActiveId] = useState<string>('');
@@ -195,8 +199,19 @@ export default function App() {
     setAuthNeeded(true);
   };
 
-  // 加载中
-  if (authNeeded === null) return null;
+  // 加载中：展示品牌骨架屏代替白屏
+  if (authNeeded === null) {
+    return (
+      <div className="flex h-full w-full items-center justify-center bg-white dark:bg-dark-bg">
+        <div className="flex flex-col items-center gap-3">
+          <div className="h-10 w-10 rounded-xl bg-gradient-to-br from-accent to-blue-500 grid place-items-center text-white text-sm font-bold shadow-lg animate-pulse">
+            AI
+          </div>
+          <span className="text-xs text-ink-400 dark:text-dark-muted">加载中…</span>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="flex h-full w-full overflow-hidden bg-white dark:bg-dark-bg">
@@ -258,31 +273,41 @@ export default function App() {
 
 
       <main className="flex min-w-0 flex-1 flex-col">
-        <ChatView
-          conversationId={activeId}
-          onOpenSettings={() => setParamsOpen(true)}
-          highlightMessageId={highlightMessageId}
-        />
+        <ErrorBoundary>
+          <ChatView
+            conversationId={activeId}
+            onOpenSettings={() => setParamsOpen(true)}
+            highlightMessageId={highlightMessageId}
+          />
+        </ErrorBoundary>
       </main>
 
-      <SettingsPanel />
+      <Suspense>
+        <SettingsPanel />
+      </Suspense>
       <ParamsDrawer
         open={paramsOpen}
         onClose={() => setParamsOpen(false)}
         conversationId={activeId}
       />
-      <Onboarding
-        open={onboardingOpen}
-        onClose={() => setOnboardingOpen(false)}
-        onSaved={() => setOnboardingOpen(false)}
-      />
-      <CommandPalette />
-      <GlobalSearch
-        open={searchOpen}
-        onClose={() => setSearchOpen(false)}
-        activeConversationId={activeId}
-        onJump={handleSearchJump}
-      />
+      <Suspense>
+        <Onboarding
+          open={onboardingOpen}
+          onClose={() => setOnboardingOpen(false)}
+          onSaved={() => setOnboardingOpen(false)}
+        />
+      </Suspense>
+      <Suspense>
+        <CommandPalette />
+      </Suspense>
+      <Suspense>
+        <GlobalSearch
+          open={searchOpen}
+          onClose={() => setSearchOpen(false)}
+          activeConversationId={activeId}
+          onJump={handleSearchJump}
+        />
+      </Suspense>
       {authNeeded && (
         <AuthScreen
           open={authNeeded}
@@ -290,11 +315,14 @@ export default function App() {
           onUnlocked={handleAuthUnlocked}
         />
       )}
-      <UserCenter
-        open={userCenterOpen}
-        onClose={() => setUserCenterOpen(false)}
-        onLogout={handleLogout}
-      />
+      <Suspense>
+        <UserCenter
+          open={userCenterOpen}
+          onClose={() => setUserCenterOpen(false)}
+          onLogout={handleLogout}
+        />
+      </Suspense>
+      <ConfirmDialog />
     </div>
   );
 }

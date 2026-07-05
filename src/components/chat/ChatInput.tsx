@@ -19,9 +19,11 @@ interface Props {
   onStop?: () => void;
   streaming?: boolean;
   placeholder?: string;
+  preFill?: string;
+  onPreFillConsumed?: () => void;
 }
 
-export function ChatInput({ onSend, onStop, streaming, placeholder }: Props) {
+export function ChatInput({ onSend, onStop, streaming, placeholder, preFill, onPreFillConsumed }: Props) {
   const [text, setText] = useState('');
   const [attachments, setAttachments] = useState<Attachment[]>([]);
   const [picker, setPicker] = useState<{ open: boolean; filter: string }>({
@@ -42,6 +44,18 @@ export function ChatInput({ onSend, onStop, streaming, placeholder }: Props) {
   const menuRef = useRef<HTMLDivElement>(null);
   const dropRef = useRef<HTMLDivElement>(null);
   const intakeTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  // 接收外部预填文本（欢迎页建议按钮）
+  useEffect(() => {
+    if (preFill) {
+      setText(preFill);
+      onPreFillConsumed?.();
+      requestAnimationFrame(() => {
+        ref.current?.focus();
+        autoResize();
+      });
+    }
+  }, [preFill]);
 
   const addFiles = useCallback(async (rawFiles: File[]) => {
     if (!rawFiles?.length) return;

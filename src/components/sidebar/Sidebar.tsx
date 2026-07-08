@@ -147,7 +147,7 @@ export function Sidebar({
           <input
             value={keyword}
             onChange={(e) => setKeyword(e.target.value)}
-            placeholder="搜索会话"
+            placeholder="搜索会话 (Ctrl+Shift+K 快捷搜索)"
             className="w-full h-7 pl-7 pr-2 rounded-md text-xs bg-white dark:bg-dark-subtle border border-surface-border dark:border-dark-border text-ink-900 dark:text-dark-ink placeholder:text-ink-400 focus:outline-none focus:border-accent focus:ring-2 focus:ring-accent/15 transition-colors"
           />
         </div>

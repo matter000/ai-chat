@@ -1,6 +1,18 @@
 # AI Chat
 
+<div align="center">
+
+**纯前端 AI 聊天应用 · 隐私优先 · 支持 15+ 国内外大模型**
+
+[在线体验](https://matter000.github.io/ai-chat/) · [反馈问题](../../issues) · [一键部署](https://github.com/matter000/ai-chat/fork)
+
+</div>
+
 一个类 Chatbox 的纯前端 AI 聊天应用。使用自己的 API Key 调用大模型，所有聊天数据存储在浏览器本地（IndexedDB），不上传任何服务器。
+
+## 🎬 截图
+
+> _这里放置主界面截图。建议跑一下 dev 后截图，丢到 `docs/screenshot.png` 然后在 README 引用。_
 
 ## ✨ 功能
 

@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { Plus, Settings, Trash2, Pin, PinOff, Search, Check, X, Pencil, MessageSquare, Sun, Moon, Monitor, User } from 'lucide-react';
+import { Plus, Settings, Trash2, Pin, PinOff, Search, Check, X, Pencil, MessageSquare, Sun, Moon, Monitor, User, GripVertical } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
 import { conversationRepo, userRepo } from '@/db';
 import { nanoid } from 'nanoid';
@@ -13,9 +13,11 @@ import { Logo } from '@/components/Logo';
 export function Sidebar({
   activeId,
   onSelect,
+  onResizeSidebar,
 }: {
   activeId?: string;
   onSelect: (id: string) => void;
+  onResizeSidebar?: (e: React.MouseEvent) => void;
 }) {
   const [keyword, setKeyword] = useState('');
   const [editingId, setEditingId] = useState<string | null>(null);
@@ -324,6 +326,18 @@ export function Sidebar({
           本地存储 · {conversations?.length ?? 0} 个会话 · 当前 {currentTheme.label}
         </div>
       </div>
+      {/* 右侧拖拽手柄：调整侧栏宽度 */}
+      {onResizeSidebar && (
+        <div
+          onMouseDown={onResizeSidebar}
+          className="absolute right-0 top-0 bottom-0 w-1.5 cursor-ew-resize hover:bg-accent/30 transition-colors z-10 group/resizer"
+          title="拖动调整侧栏宽度"
+        >
+          <div className="absolute left-1/2 -translate-x-1/2 top-1/2 -translate-y-1/2 opacity-0 group-hover/resizer:opacity-100 transition-opacity">
+            <GripVertical size={12} className="text-ink-300" />
+          </div>
+        </div>
+      )}
     </aside>
   );
 }

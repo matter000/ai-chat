@@ -18,10 +18,11 @@ interface Props {
   onSend: (text: string, attachments?: Attachment[]) => void;
   onStop?: () => void;
   streaming?: boolean;
+  pending?: boolean;
   placeholder?: string;
 }
 
-export function ChatInput({ onSend, onStop, streaming, placeholder }: Props) {
+export function ChatInput({ onSend, onStop, streaming, pending, placeholder }: Props) {
   const [text, setText] = useState('');
   const [attachments, setAttachments] = useState<Attachment[]>([]);
   const [picker, setPicker] = useState<{ open: boolean; filter: string }>({
@@ -588,7 +589,7 @@ export function ChatInput({ onSend, onStop, streaming, placeholder }: Props) {
         <button
           onClick={streaming ? onStop : submit}
           disabled={!canSend || (!streaming && !text.trim() && attachments.length === 0)}
-          aria-label={streaming ? '停止生成' : '发送'}
+          aria-label={streaming ? '停止生成' : pending ? '等待响应…' : '发送'}
           className={clsx(
             'absolute right-3 top-1/2 -translate-y-1/2',
             'inline-flex h-11 w-11 items-center justify-center rounded-2xl',
@@ -601,7 +602,9 @@ export function ChatInput({ onSend, onStop, streaming, placeholder }: Props) {
             'active:scale-95',
           )}
         >
-          {streaming ? (
+          {pending ? (
+            <Loader2 size={18} className="animate-spin" />
+          ) : streaming ? (
             <Square size={16} fill="currentColor" />
           ) : (
             <ArrowUp size={22} strokeWidth={2.5} />

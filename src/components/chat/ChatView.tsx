@@ -56,6 +56,7 @@ export function ChatView({ conversationId, onOpenSettings, highlightMessageId }:
   const titleCancelledRef = useRef(false); // BUG-2: Escape 取消标记
 
   const [streaming, setStreaming] = useState(false);
+  const [pending, setPending] = useState(false);
   const [streamedText, setStreamedText] = useState('');
   const [error, setError] = useState<string | null>(null);
   const abortRef = useRef<AbortController | null>(null);
@@ -93,6 +94,7 @@ export function ChatView({ conversationId, onOpenSettings, highlightMessageId }:
   useEffect(() => {
     setStreamedText('');
     setError(null);
+    setPending(false);
     abortRef.current?.abort();
     setStreaming(false);
   }, [conversationId]);
@@ -237,6 +239,7 @@ export function ChatView({ conversationId, onOpenSettings, highlightMessageId }:
     const ac = new AbortController();
     abortRef.current = ac;
     setStreaming(true);
+    setPending(true);
 
     let acc = '';
     try {
@@ -249,6 +252,7 @@ export function ChatView({ conversationId, onOpenSettings, highlightMessageId }:
         onDelta: (delta) => {
           acc += delta;
           setStreamedText(acc);
+          setPending(false); // 收到首个 token，取消 pending
         },
       });
       // 流式完成 → 写入数据库
@@ -264,6 +268,7 @@ export function ChatView({ conversationId, onOpenSettings, highlightMessageId }:
       }
     } finally {
       setStreaming(false);
+      setPending(false);
       setStreamedText('');
       abortRef.current = null;
     }
@@ -299,6 +304,7 @@ export function ChatView({ conversationId, onOpenSettings, highlightMessageId }:
     const ac = new AbortController();
     abortRef.current = ac;
     setStreaming(true);
+    setPending(true);
     let acc = '';
     try {
       await dispatchChat(activeProvider, {
@@ -310,6 +316,7 @@ export function ChatView({ conversationId, onOpenSettings, highlightMessageId }:
         onDelta: (delta) => {
           acc += delta;
           setStreamedText(acc);
+          setPending(false);
         },
       });
       const newAssistant: Message = {
@@ -326,6 +333,7 @@ export function ChatView({ conversationId, onOpenSettings, highlightMessageId }:
       }
     } finally {
       setStreaming(false);
+      setPending(false);
       setStreamedText('');
       abortRef.current = null;
     }
@@ -333,6 +341,7 @@ export function ChatView({ conversationId, onOpenSettings, highlightMessageId }:
 
   const handleDeleteMessage = async (id: string) => {
     if (streaming) return;
+    if (!confirm('确认删除这条消息？')) return;
     await messageRepo.delete(id);
   };
 
@@ -378,6 +387,7 @@ export function ChatView({ conversationId, onOpenSettings, highlightMessageId }:
     const ac = new AbortController();
     abortRef.current = ac;
     setStreaming(true);
+    setPending(true);
     let acc = '';
     try {
       await dispatchChat(activeProvider, {
@@ -389,6 +399,7 @@ export function ChatView({ conversationId, onOpenSettings, highlightMessageId }:
         onDelta: (delta) => {
           acc += delta;
           setStreamedText(acc);
+          setPending(false);
         },
       });
       await messageRepo.update(assistantId, { content: acc });
@@ -399,6 +410,7 @@ export function ChatView({ conversationId, onOpenSettings, highlightMessageId }:
       }
     } finally {
       setStreaming(false);
+      setPending(false);
       setStreamedText('');
       abortRef.current = null;
     }
@@ -628,6 +640,7 @@ export function ChatView({ conversationId, onOpenSettings, highlightMessageId }:
         onSend={handleSend}
         onStop={handleStop}
         streaming={streaming}
+        pending={pending}
         placeholder={placeholder}
       />
     </div>

@@ -12,10 +12,10 @@ import { GlobalSearch } from '@/components/GlobalSearch';
 import { UserCenter } from '@/components/settings/UserCenter';
 import { Button } from '@/components/ui/Button';
 import { clsx } from 'clsx';
-import { useUIStore } from '@/store/uiStore';
-import { applyTheme } from '@/store/uiStore';
+import { useUIStore, applyTheme } from '@/store/uiStore';
 import { providerRepo, conversationRepo, userRepo } from '@/db';
 import { useShortcuts } from '@/hooks/useShortcuts';
+import { useSidebarWidth } from '@/hooks/useSidebarWidth';
 import { useLockStore } from '@/store/lockStore';
 import { getAuthState, setAuthState, type UserProfile } from '@/store/userStore';
 import { unlockWithPassword, isEncryptionEnabled, hasMasterPassword, isUnlocked } from '@/services/crypto';
@@ -36,6 +36,7 @@ export default function App() {
   const collapseSidebar = useUIStore((s) => s.collapseSidebar);
   const toggleSidebar = useUIStore((s) => s.toggleSidebar);
   const expandSidebar = useUIStore((s) => s.expandSidebar);
+  const { width: sidebarWidth, onMouseDown: onResizeSidebar } = useSidebarWidth();
   // 侧栏的最终显示状态：展开 OR 收起但 hover
   const sidebarShown = sidebarState === 'expanded' || (sidebarState === 'collapsed' && sidebarHover);
   const openSettings = useUIStore((s) => s.openSettings);
@@ -211,7 +212,7 @@ export default function App() {
           'md:relative absolute inset-y-0 left-0 z-30 flex',
           'transition-all duration-200 ease-out',
         )}
-        style={{ width: sidebarShown ? (window.innerWidth < 768 ? '100%' : '256px') : '0px' }}
+        style={{ width: sidebarShown ? (window.innerWidth < 768 ? '100%' : `${sidebarWidth}px`) : '0px' }}
         onMouseEnter={() => setSidebarHover(true)}
         onMouseLeave={() => setSidebarHover(false)}
       >
@@ -227,6 +228,7 @@ export default function App() {
               setActiveId(id);
               if (window.innerWidth < 768) collapseSidebar();
             }}
+            onResizeSidebar={onResizeSidebar}
           />
         </div>
       </div>

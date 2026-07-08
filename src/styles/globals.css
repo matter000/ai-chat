@@ -31,20 +31,23 @@ body {
 .dark ::-webkit-scrollbar-thumb { background: rgba(230, 232, 235, 0.10); }
 .dark ::-webkit-scrollbar-thumb:hover { background: rgba(230, 232, 235, 0.18); }
 
-/* 焦点环：仅在鼠标点击时隐藏 outline，键盘导航时保留可见焦点指示（无障碍） */
-*:focus:not(:focus-visible) {
-  outline: none;
-}
+/* 焦点环：克制风格，只在必要控件上显示 */
+/* 默认隐藏原生 outline 和全局 ring —— 由各组件自己用更细致的方式提示 */
+*:focus { outline: none; }
 *:focus-visible {
-  outline: 2px solid theme('colors.accent.DEFAULT');
-  outline-offset: 2px;
-  border-radius: 4px;
-}
-/* 输入框的焦点样式由组件自身控制（border 变色 / ring） */
-input:focus-visible,
-textarea:focus-visible,
-select:focus-visible {
   outline: none;
+  box-shadow: none;
+}
+
+/* 给"会让人迷茫的控件"做细 ring：input、button、select、textarea 之外的链接 */
+a:focus-visible,
+button:focus-visible,
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible {
+  /* 不画 ring / outline —— 改成由父容器的 shadow / 边框色变深提示 */
+  outline: none;
+  box-shadow: none;
 }
 
 /* 让输入框高度跟内容走，单行时 placeholder 垂直居中 */

@@ -1,0 +1,17 @@
+{
+  "name": "AI Chat",
+  "short_name": "AI Chat",
+  "description": "纯前端 AI 聊天应用 - 隐私优先",
+  "start_url": "/ai-chat/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#1d4ed8",
+  "icons": [
+    {
+      "src": "/ai-chat/favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}

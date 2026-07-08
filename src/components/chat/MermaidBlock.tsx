@@ -1,21 +1,18 @@
 import { useEffect, useState } from 'react';
-import DOMPurify from 'dompurify';
+import mermaid from 'mermaid';
 import { clsx } from 'clsx';
 
-// 懒加载 mermaid：仅在实际渲染图表时才下载 (~2MB)
-let mermaidModule: typeof import('mermaid') | null = null;
+let initialized = false;
 
-async function getMermaid() {
-  if (!mermaidModule) {
-    mermaidModule = await import('mermaid');
-    mermaidModule.default.initialize({
-      startOnLoad: false,
-      theme: 'default',
-      securityLevel: 'sandbox',
-      fontFamily: 'inherit',
-    });
-  }
-  return mermaidModule.default;
+function initMermaid() {
+  if (initialized) return;
+  initialized = true;
+  mermaid.initialize({
+    startOnLoad: false,
+    theme: 'default',
+    securityLevel: 'sandbox',
+    fontFamily: 'inherit',
+  });
 }
 
 interface Props {
@@ -27,14 +24,12 @@ export function MermaidBlock({ chart }: Props) {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
+    initMermaid();
     let cancelled = false;
-
+    const id = `mermaid-${Math.random().toString(36).slice(2, 9)}`;
     (async () => {
       try {
-        const m = await getMermaid();
-        if (cancelled) return;
-        const id = `mermaid-${Math.random().toString(36).slice(2, 9)}`;
-        const { svg: result } = await m.render(id, chart);
+        const { svg: result } = await mermaid.render(id, chart);
         if (!cancelled) {
           setSvg(result);
           setError(null);
@@ -46,7 +41,6 @@ export function MermaidBlock({ chart }: Props) {
         }
       }
     })();
-
     return () => {
       cancelled = true;
     };
@@ -78,9 +72,7 @@ export function MermaidBlock({ chart }: Props) {
       className={clsx(
         'rounded-lg border border-surface-border dark:border-dark-border bg-white dark:bg-dark-subtle p-4 my-2 overflow-x-auto',
       )}
-      dangerouslySetInnerHTML={{
-        __html: DOMPurify.sanitize(svg, { USE_PROFILES: { svg: true, svgFilters: true } }),
-      }}
+      dangerouslySetInnerHTML={{ __html: svg }}
     />
   );
 }

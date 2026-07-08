@@ -192,11 +192,10 @@ export function GlobalSearch({ open, onClose, onJump, activeConversationId }: Pr
               {g.hits.map((h) => {
                 runningIdx++;
                 const isActive = runningIdx === active;
-                const myIdx = runningIdx;
                 return (
                   <button
                     key={h.message.id}
-                    onMouseEnter={() => setActive(myIdx)}
+                    onMouseEnter={() => setActive(runningIdx + 1)}
                     onClick={() => handleJump(h)}
                     className={clsx(
                       'flex w-full items-start gap-3 px-4 py-2.5 text-left transition-colors',

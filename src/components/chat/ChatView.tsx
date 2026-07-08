@@ -11,7 +11,6 @@ import { dispatchChat } from '@/services/adapters';
 import { Button } from '@/components/ui/Button';
 import { EmptyState } from '@/components/ui/EmptyState';
 import { useLockStore } from '@/store/lockStore';
-import { useConfirmStore } from '@/store/confirmStore';
 import { exportConversationAsMarkdown, downloadMarkdown } from '@/services/exportMarkdown';
 import { useMessageMaxWidth } from '@/hooks/useMessageMaxWidth';
 
@@ -34,20 +33,27 @@ export function ChatView({ conversationId, onOpenSettings, highlightMessageId }:
     [conversationId],
   );
 
-  // 解锁状态变化时自动重读 provider 列表
-  const lockUnlocked = useLockStore((s) => s.unlocked);
-  const effectiveProviders = useLiveQuery(
-    () => providerRepo.list(),
-    [lockUnlocked],
-  );
+  const providers = useLiveQuery(() => providerRepo.list(), []);
   const { width: messageMaxWidth, onMouseDown: onResizeMessage } = useMessageMaxWidth();
-  const confirmAction = useConfirmStore((s) => s.confirm);
+  // 解锁状态变化时强制重读
+  const lockUnlocked = useLockStore((s) => s.unlocked);
+  const [tick, setTick] = useState(0);
+  useEffect(() => {
+    setTick((t) => t + 1);
+  }, [lockUnlocked]);
+  const providersReloaded = useLiveQuery(
+    async () => {
+      void tick; // 依赖 tick 触发
+      return providerRepo.list();
+    },
+    [tick],
+  );
+  const effectiveProviders = providersReloaded ?? providers;
 
   const [editingTitle, setEditingTitle] = useState(false);
   const [titleDraft, setTitleDraft] = useState('');
   const titleInputRef = useRef<HTMLInputElement>(null);
   const titleCancelledRef = useRef(false); // BUG-2: Escape 取消标记
-  const [preFill, setPreFill] = useState(''); // 建议文本预填
 
   const [streaming, setStreaming] = useState(false);
   const [streamedText, setStreamedText] = useState('');
@@ -234,7 +240,7 @@ export function ChatView({ conversationId, onOpenSettings, highlightMessageId }:
 
     let acc = '';
     try {
-      const result = await dispatchChat(activeProvider, {
+      await dispatchChat(activeProvider, {
         model: activeModel,
         messages: ctx,
         systemPrompt: conversation.systemPrompt,
@@ -245,8 +251,8 @@ export function ChatView({ conversationId, onOpenSettings, highlightMessageId }:
           setStreamedText(acc);
         },
       });
-      // 流式完成 → 写入数据库（含 token 用量）
-      await messageRepo.update(assistantId, { content: acc, tokens: result.tokens?.total });
+      // 流式完成 → 写入数据库
+      await messageRepo.update(assistantId, { content: acc });
     } catch (err: any) {
       if (err?.name === 'AbortError') {
         // 用户中止：保留已生成内容
@@ -275,11 +281,9 @@ export function ChatView({ conversationId, onOpenSettings, highlightMessageId }:
     const userMsg = all[idx - 1];
     // 阅后即焚：原图已不在 IndexedDB，重新生成时无法再带图
     if (userMsg.hasAttachments) {
-      const ok = await confirmAction({
-        title: '重新生成',
-        message: '这条消息原本包含附件，但附件不会保存到本地，重新生成时模型将无法看到原附件（只会基于文本重答）。\n\n确定要继续吗？',
-        confirmLabel: '继续',
-      });
+      const ok = confirm(
+        '这条消息原本包含附件，但附件不会保存到本地，重新生成时模型将无法看到原附件（只会基于文本重答）。\n\n确定要继续吗？',
+      );
       if (!ok) return;
     }
     // 删除该 assistant 消息及其后所有消息（BUG-007 修复：清除孤儿分支）
@@ -297,7 +301,7 @@ export function ChatView({ conversationId, onOpenSettings, highlightMessageId }:
     setStreaming(true);
     let acc = '';
     try {
-      const result = await dispatchChat(activeProvider, {
+      await dispatchChat(activeProvider, {
         model: activeModel,
         messages: ctx,
         systemPrompt: conversation.systemPrompt,
@@ -314,7 +318,6 @@ export function ChatView({ conversationId, onOpenSettings, highlightMessageId }:
         role: 'assistant',
         content: acc,
         createdAt: Date.now(),
-        tokens: result.tokens?.total,
       };
       await messageRepo.add(newAssistant);
     } catch (err: any) {
@@ -343,11 +346,9 @@ export function ChatView({ conversationId, onOpenSettings, highlightMessageId }:
     if (targetMsg.role !== 'user') return;
     // BUG-7: 附件警告
     if (targetMsg.hasAttachments) {
-      const ok = await confirmAction({
-        title: '编辑消息',
-        message: '这条消息原本包含附件。编辑后重新生成时，模型将无法看到原附件。\n\n确定要继续编辑吗？',
-        confirmLabel: '继续',
-      });
+      const ok = confirm(
+        '这条消息原本包含附件。编辑后重新生成时，模型将无法看到原附件。\n\n确定要继续编辑吗？',
+      );
       if (!ok) return;
     }
     await messageRepo.update(id, { content: newContent });
@@ -379,7 +380,7 @@ export function ChatView({ conversationId, onOpenSettings, highlightMessageId }:
     setStreaming(true);
     let acc = '';
     try {
-      const result = await dispatchChat(activeProvider, {
+      await dispatchChat(activeProvider, {
         model: activeModel,
         messages: ctx,
         systemPrompt: conversation.systemPrompt,
@@ -390,7 +391,7 @@ export function ChatView({ conversationId, onOpenSettings, highlightMessageId }:
           setStreamedText(acc);
         },
       });
-      await messageRepo.update(assistantId, { content: acc, tokens: result.tokens?.total });
+      await messageRepo.update(assistantId, { content: acc });
     } catch (err: any) {
       if (err?.name !== 'AbortError') {
         setError(err?.message || String(err));
@@ -555,7 +556,10 @@ export function ChatView({ conversationId, onOpenSettings, highlightMessageId }:
                     <button
                       key={s.text}
                       onClick={() => {
-                        setPreFill(s.text);
+                        const el = document.querySelector('textarea');
+                        if (el instanceof HTMLTextAreaElement) {
+                          el.focus();
+                        }
                       }}
                       className="flex items-start gap-2.5 text-left rounded-lg border border-surface-border dark:border-dark-border bg-white dark:bg-dark-panel p-3 hover:border-accent dark:hover:border-accent hover:bg-accent-soft/30 dark:hover:bg-accent/10 transition-colors"
                     >
@@ -625,8 +629,6 @@ export function ChatView({ conversationId, onOpenSettings, highlightMessageId }:
         onStop={handleStop}
         streaming={streaming}
         placeholder={placeholder}
-        preFill={preFill}
-        onPreFillConsumed={() => setPreFill('')}
       />
     </div>
   );

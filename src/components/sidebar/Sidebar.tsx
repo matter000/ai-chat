@@ -8,6 +8,7 @@ import { useUIStore } from '@/store/uiStore';
 import { getAuthState } from '@/store/userStore';
 import { useLiveQuery } from 'dexie-react-hooks';
 import { clsx } from 'clsx';
+import { Logo } from '@/components/Logo';
 
 export function Sidebar({
   activeId,
@@ -127,9 +128,7 @@ export function Sidebar({
 
         </button>
         <div className="flex items-center gap-2 min-w-0">
-          <div className="h-6 w-6 rounded-md bg-gradient-to-br from-accent to-blue-500 grid place-items-center text-white text-[11px] font-bold shrink-0">
-            AI
-          </div>
+          <Logo size={24} className="shrink-0" />
           <span className="text-sm font-semibold tracking-tight truncate">AI Chat</span>
         </div>
         <Button size="icon" variant="ghost" onClick={openSettings} aria-label="设置">

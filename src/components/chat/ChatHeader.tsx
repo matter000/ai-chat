@@ -2,10 +2,11 @@
  * ChatView 顶部 header：标题（可编辑）+ 右侧操作
  */
 import { useState, useRef, useEffect } from 'react';
-import { Pencil, Check, X, Download, SlidersHorizontal } from 'lucide-react';
+import { Pencil, Check, X, Download, SlidersHorizontal, Menu } from 'lucide-react';
 import type { Conversation } from '@/types';
 import { ModelSwitcher } from './ModelSwitcher';
 import { Button } from '@/components/ui/Button';
+import { useUIStore } from '@/store/uiStore';
 
 interface Props {
   conversationId?: string;
@@ -48,8 +49,21 @@ export function ChatHeader({ conversationId, conversation, onOpenSettings, onExp
     setEditing(false);
   };
 
+  const expandSidebar = useUIStore((s) => s.expandSidebar);
+
   return (
-    <header className="flex items-center justify-between gap-2 px-4 h-12 border-b border-surface-border dark:border-dark-border shrink-0">
+    <header className="flex items-center justify-between gap-2 px-3 sm:px-4 h-12 border-b border-surface-border dark:border-dark-border shrink-0">
+      {/* mobile 专用：展开侧栏按钮（仅 md 以下显示，且侧栏收起时） */}
+      <Button
+        size="icon"
+        variant="ghost"
+        onClick={expandSidebar}
+        aria-label="打开侧栏"
+        title="打开侧栏"
+        className="md:hidden shrink-0"
+      >
+        <Menu size={18} />
+      </Button>
       <div className="min-w-0 flex-1">
         {editing ? (
           <div className="flex items-center gap-1.5">

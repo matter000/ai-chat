@@ -139,7 +139,7 @@ export function ChatView({ conversationId, onOpenSettings, highlightMessageId }:
       >
         <div
           style={{ maxWidth: messageMaxWidth }}
-          className="relative mx-auto w-full px-6 py-8 flex flex-col gap-6"
+          className="relative mx-auto w-full px-3 sm:px-6 py-4 sm:py-8 flex flex-col gap-4 sm:gap-6"
         >
           <div
             onMouseDown={onResizeMessage}

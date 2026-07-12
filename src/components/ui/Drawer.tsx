@@ -7,6 +7,7 @@ interface Props {
   open: boolean;
   onClose: () => void;
   title?: string;
+  /** ≥sm 屏宽，<sm 屏会全屏覆盖 */
   width?: number;
   children?: ReactNode;
 }
@@ -24,14 +25,15 @@ export function Drawer({ open, onClose, title, width = 380, children }: Props) {
       />
       <aside
         className={clsx(
-          'fixed right-0 top-0 z-50 h-full flex flex-col',
+          'fixed inset-y-0 right-0 z-50 flex flex-col',
           'bg-white dark:bg-dark-panel',
           'border-l border-surface-border dark:border-dark-border',
           'shadow-lg',
           'transition-transform duration-200 ease-out',
+          'w-full sm:w-[var(--drawer-w)]',
           open ? 'translate-x-0' : 'translate-x-full',
         )}
-        style={{ width }}
+        style={{ '--drawer-w': `${width}px` } as React.CSSProperties}
       >
         <header className="flex items-center justify-between px-5 h-12 border-b border-surface-border dark:border-dark-border shrink-0">
           <h3 className="text-sm font-semibold tracking-tight">{title}</h3>

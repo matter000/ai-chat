@@ -58,7 +58,7 @@ export function MessageItem({ message, streaming, onRegenerate, onDelete, onEdit
       className={clsx(
         'group relative animate-fade-in rounded-lg transition-colors duration-fast',
         pulse && 'ring-2 ring-amber-300/70 bg-amber-50/50 dark:bg-amber-500/10',
-        isUser ? 'flex justify-end items-start gap-3' : 'flex justify-start items-start gap-3',
+        isUser ? 'flex justify-end items-start gap-2 sm:gap-3' : 'flex justify-start items-start gap-2 sm:gap-3',
       )}
     >
       {/* AI 头像：左边 */}
@@ -162,7 +162,7 @@ export function MessageItem({ message, streaming, onRegenerate, onDelete, onEdit
         <div
           className={clsx(
             'mt-2 flex items-center gap-0.5',
-            'opacity-0 group-hover:opacity-100 transition-opacity duration-fast',
+            'opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity duration-fast',
             isUser ? 'justify-end' : '',
           )}
         >

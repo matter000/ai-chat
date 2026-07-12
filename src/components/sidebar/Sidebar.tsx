@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { Plus, Settings, Trash2, Pin, PinOff, Search, Check, X, Pencil, MessageSquare, Sun, Moon, Monitor, User, GripVertical } from 'lucide-react';
+import { Plus, Settings, Trash2, Pin, PinOff, Search, Check, X, Pencil, MessageSquare, Sun, Moon, Monitor, User, GripVertical, PanelLeftClose } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
 import { conversationRepo, userRepo } from '@/db';
 import { nanoid } from 'nanoid';
@@ -134,7 +134,7 @@ export function Sidebar({
           title="收起侧栏"
           className="flex h-7 w-7 items-center justify-center rounded-md text-ink-500 dark:text-dark-muted hover:bg-ink-100 dark:hover:bg-dark-subtle transition-colors"
         >
-
+          <PanelLeftClose size={15} />
         </button>
         <div className="flex items-center gap-2 min-w-0">
           <Logo size={24} className="shrink-0" />

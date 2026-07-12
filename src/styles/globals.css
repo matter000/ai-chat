@@ -12,6 +12,14 @@ html, body, #root {
   margin: 0;
 }
 
+/* iOS / Android safe-area：底部输入框不被 home indicator 遮挡 */
+.safe-bottom {
+  padding-bottom: env(safe-area-inset-bottom);
+}
+.safe-top {
+  padding-top: env(safe-area-inset-top);
+}
+
 body {
   font-family: theme('fontFamily.sans');
   font-size: 14px;

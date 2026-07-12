@@ -323,7 +323,7 @@ export function ChatInput({ onSend, onStop, streaming, pending, placeholder }: P
   const canSend = streaming || !!text.trim() || attachments.length > 0;
 
   return (
-    <div className="relative border-t border-surface-border dark:border-dark-border bg-surface-alt dark:bg-dark-bg px-4 py-3">
+    <div className="relative border-t border-surface-border dark:border-dark-border bg-surface-alt dark:bg-dark-bg px-2 sm:px-4 py-3 safe-bottom">
       <div
         ref={dropRef}
         className={clsx(
@@ -457,7 +457,7 @@ export function ChatInput({ onSend, onStop, streaming, pending, placeholder }: P
         </div>
 
         {/* 加号菜单 + 字数 */}
-        <div className="absolute left-3 top-1/2 -translate-y-1/2 flex items-center gap-1">
+        <div className="absolute left-2 sm:left-3 top-1/2 -translate-y-1/2 flex items-center gap-1">
           <div className="relative" ref={menuRef}>
             <button
               type="button"
@@ -480,7 +480,7 @@ export function ChatInput({ onSend, onStop, streaming, pending, placeholder }: P
             {menuOpen && (
               <div
                 className={clsx(
-                  'absolute z-30 left-0 bottom-full mb-2 w-[240px]',
+                  'absolute z-30 left-0 bottom-full mb-2 w-[220px] sm:w-[240px]',
                   'rounded-xl border border-surface-border dark:border-dark-border',
                   'bg-white dark:bg-dark-panel shadow-lg overflow-hidden',
                   'p-1.5 animate-slide-up',
@@ -579,7 +579,7 @@ export function ChatInput({ onSend, onStop, streaming, pending, placeholder }: P
           />
 
           {(attachments.length > 0 || text.length > 0) && (
-            <span className="absolute bottom-3 right-16 text-[10px] text-ink-400 dark:text-dark-muted tabular-nums pointer-events-none">
+            <span className="absolute bottom-2 sm:bottom-3 right-14 sm:right-16 text-[10px] text-ink-400 dark:text-dark-muted tabular-nums pointer-events-none">
               {attachments.length > 0 && `${attachments.length} 个附件 · `}
               {text.length > 0 && `${text.length} 字`}
             </span>
@@ -592,8 +592,8 @@ export function ChatInput({ onSend, onStop, streaming, pending, placeholder }: P
           disabled={!canSend || (!streaming && !text.trim() && attachments.length === 0)}
           aria-label={streaming ? '停止生成' : pending ? '等待响应…' : '发送'}
           className={clsx(
-            'absolute right-3 top-1/2 -translate-y-1/2',
-            'inline-flex h-11 w-11 items-center justify-center rounded-2xl',
+            'absolute right-2 sm:right-3 top-1/2 -translate-y-1/2',
+            'inline-flex h-9 w-9 sm:h-11 sm:w-11 items-center justify-center rounded-2xl',
             'transition-all duration-fast ease-out',
             'shadow-md',
             streaming
@@ -604,11 +604,11 @@ export function ChatInput({ onSend, onStop, streaming, pending, placeholder }: P
           )}
         >
           {pending ? (
-            <Loader2 size={18} className="animate-spin" />
+            <Loader2 size={16} className="animate-spin" />
           ) : streaming ? (
-            <Square size={16} fill="currentColor" />
+            <Square size={14} fill="currentColor" />
           ) : (
-            <ArrowUp size={22} strokeWidth={2.5} />
+            <ArrowUp size={20} strokeWidth={2.5} />
           )}
         </button>
       </div>

@@ -203,11 +203,8 @@ export default function App() {
 
   return (
     <div className="flex h-full w-full overflow-hidden bg-white dark:bg-dark-bg">
-      <div className="md:hidden absolute left-2 top-2 z-40">
-        <Button size="icon" variant="ghost" onClick={toggleSidebar} aria-label="菜单">
-          <Menu size={18} />
-        </Button>
-      </div>
+      {/* mobile 收起侧栏后，汉堡按钮放到 ChatHeader 左边（同 row） */}
+      {/* 这里不再放 hamburger，避免和标题重叠 */}
 
       <div
         className={clsx(

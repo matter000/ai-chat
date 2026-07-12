@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { Loader2 } from 'lucide-react';
 import { Plus, Trash2, Save, Eye, EyeOff, ExternalLink, AlertTriangle, Lock } from 'lucide-react';
 import { useLiveQuery } from 'dexie-react-hooks';
 import { nanoid } from 'nanoid';
@@ -167,6 +168,7 @@ export function ProviderManager() {
   const providers = useLiveQuery(() => providerRepo.list(), []);
   const [editing, setEditing] = useState<Provider | null>(null);
   const [showKey, setShowKey] = useState(false);
+  const [saving, setSaving] = useState(false);
 
   const createBlank = () => {
     setEditing({
@@ -193,13 +195,20 @@ export function ProviderManager() {
   };
 
   const save = async () => {
-    if (!editing) return;
+    if (!editing || saving) return;
     if (!editing.name.trim() || !editing.baseUrl.trim()) {
       toast.error('名称和 Base URL 不能为空');
       return;
     }
-    await providerRepo.upsert(editing);
-    setEditing(null);
+    setSaving(true);
+    try {
+      await providerRepo.upsert(editing);
+      setEditing(null);
+    } catch (e: any) {
+      toast.error(`保存失败：${e?.message || e}`);
+    } finally {
+      setSaving(false);
+    }
   };
 
   const remove = async (id: string) => {
@@ -402,12 +411,12 @@ export function ProviderManager() {
             </div>
           )}
           <div className="flex justify-end gap-2 pt-1">
-            <Button size="sm" variant="ghost" onClick={() => setEditing(null)}>
+            <Button size="sm" variant="ghost" onClick={() => setEditing(null)} disabled={saving}>
               取消
             </Button>
-            <Button size="sm" variant="primary" onClick={save}>
-              <Save size={12} />
-              保存
+            <Button size="sm" variant="primary" onClick={save} disabled={saving}>
+              {saving ? <Loader2 size={12} className="animate-spin" /> : <Save size={12} />}
+              保存中…
             </Button>
           </div>
         </div>

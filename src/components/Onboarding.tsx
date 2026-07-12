@@ -6,6 +6,7 @@ import { Modal } from '@/components/ui/Modal';
 import { Input } from '@/components/ui/Input';
 import { Button } from '@/components/ui/Button';
 import { clsx } from 'clsx';
+import { toast } from '@/store/toastStore';
 
 interface PresetSpec {
   name: string;
@@ -47,7 +48,7 @@ export function Onboarding({ open, onClose, onSaved }: Props) {
 
   const save = async () => {
     if (!apiKey.trim()) {
-      alert('请填写 API Key');
+      toast.error('请填写 API Key');
       return;
     }
     const p: Provider = {

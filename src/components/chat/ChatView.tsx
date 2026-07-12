@@ -13,6 +13,8 @@ import { EmptyState } from '@/components/ui/EmptyState';
 import { useLockStore } from '@/store/lockStore';
 import { exportConversationAsMarkdown, downloadMarkdown } from '@/services/exportMarkdown';
 import { useMessageMaxWidth } from '@/hooks/useMessageMaxWidth';
+import { confirmDialog } from '@/store/confirmStore';
+import { toast } from '@/store/toastStore';
 
 interface Props {
   conversationId?: string;
@@ -286,9 +288,11 @@ export function ChatView({ conversationId, onOpenSettings, highlightMessageId }:
     const userMsg = all[idx - 1];
     // 阅后即焚：原图已不在 IndexedDB，重新生成时无法再带图
     if (userMsg.hasAttachments) {
-      const ok = confirm(
-        '这条消息原本包含附件，但附件不会保存到本地，重新生成时模型将无法看到原附件（只会基于文本重答）。\n\n确定要继续吗？',
-      );
+      const ok = await confirmDialog({
+        title: '附件已阅后即焚',
+        message: '这条消息原本包含附件，但附件不会保存到本地。重新生成时模型将无法看到原附件（只会基于文本重答）。\n\n确定要继续吗？',
+        confirmLabel: '继续重新生成',
+      });
       if (!ok) return;
     }
     // 删除该 assistant 消息及其后所有消息（BUG-007 修复：清除孤儿分支）
@@ -341,7 +345,13 @@ export function ChatView({ conversationId, onOpenSettings, highlightMessageId }:
 
   const handleDeleteMessage = async (id: string) => {
     if (streaming) return;
-    if (!confirm('确认删除这条消息？')) return;
+    const ok = await confirmDialog({
+      title: '删除消息',
+      message: '确认要删除这条消息？',
+      confirmLabel: '删除',
+      danger: true,
+    });
+    if (!ok) return;
     await messageRepo.delete(id);
   };
 
@@ -355,9 +365,11 @@ export function ChatView({ conversationId, onOpenSettings, highlightMessageId }:
     if (targetMsg.role !== 'user') return;
     // BUG-7: 附件警告
     if (targetMsg.hasAttachments) {
-      const ok = confirm(
-        '这条消息原本包含附件。编辑后重新生成时，模型将无法看到原附件。\n\n确定要继续编辑吗？',
-      );
+      const ok = await confirmDialog({
+        title: '附件已阅后即焚',
+        message: '这条消息原本包含附件。编辑后重新生成时，模型将无法看到原附件。\n\n确定要继续编辑吗？',
+        confirmLabel: '继续编辑',
+      });
       if (!ok) return;
     }
     await messageRepo.update(id, { content: newContent });
@@ -503,7 +515,7 @@ export function ChatView({ conversationId, onOpenSettings, highlightMessageId }:
                 const name = (conversation.title || '新会话').replace(/[/\\?%*:|"<>]/g, '_');
                 downloadMarkdown(md, `${name}-${new Date().toISOString().slice(0, 10)}.md`);
               } catch (e: any) {
-                alert(`导出失败：${e?.message || e}`);
+                toast.error(`导出失败：${e?.message || e}`);
               }
             }}
             title="导出为 Markdown"

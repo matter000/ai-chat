@@ -9,6 +9,7 @@ import { getAuthState } from '@/store/userStore';
 import { useLiveQuery } from 'dexie-react-hooks';
 import { clsx } from 'clsx';
 import { Logo } from '@/components/Logo';
+import { confirmDialog } from '@/store/confirmStore';
 
 export function Sidebar({
   activeId,
@@ -71,7 +72,13 @@ export function Sidebar({
 
   const remove = async (id: string, e: React.MouseEvent) => {
     e.stopPropagation();
-    if (!confirm('删除该会话及其全部消息？')) return;
+    const ok = await confirmDialog({
+      title: '删除会话',
+      message: '该会话及其全部消息将被永久删除，无法恢复。',
+      confirmLabel: '删除',
+      danger: true,
+    });
+    if (!ok) return;
     await conversationRepo.delete(id);
     if (activeId === id) onSelect('');
   };

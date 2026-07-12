@@ -11,6 +11,7 @@ import { hashUserPassword, verifyUserPassword } from '@/services/crypto';
 import { getAuthState, clearAuthState, type UserProfile } from '@/store/userStore';
 import { conversationRepo, providerRepo } from '@/db';
 import { clsx } from 'clsx';
+import { toast } from '@/store/toastStore';
 
 interface Props {
   open: boolean;
@@ -135,7 +136,7 @@ export function UserCenter({ open, onClose, onLogout }: Props) {
         clearAuthState();
         location.reload();
       } catch (e: any) {
-        alert(`删除失败：${e?.message || e}`);
+        toast.error(`删除失败：${e?.message || e}`);
         setBusyDelete(false);
       }
     })();

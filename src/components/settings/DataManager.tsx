@@ -2,6 +2,8 @@ import { useRef } from 'react';
 import { Download, Upload, Trash2 } from 'lucide-react';
 import { exportAll, importAll, conversationRepo } from '@/db';
 import { Button } from '@/components/ui/Button';
+import { toast } from '@/store/toastStore';
+import { confirmDialog } from '@/store/confirmStore';
 
 export function DataManager() {
   const fileRef = useRef<HTMLInputElement>(null);
@@ -61,9 +63,15 @@ export function DataManager() {
   };
 
   const handleClear = async () => {
-    if (!confirm('将清空全部会话与消息（Provider 配置保留），确认？')) return;
+    const ok = await confirmDialog({
+      title: '清空全部会话',
+      message: '将清空全部会话与消息（Provider 配置保留），确认？',
+      confirmLabel: '清空',
+      danger: true,
+    });
+    if (!ok) return;
     await conversationRepo.clear();
-    alert('已清空会话');
+    toast.success('已清空会话');
     location.reload();
   };
 

@@ -6,19 +6,11 @@ interface ConfirmState {
   message: string;
   confirmLabel: string;
   danger: boolean;
-  resolve: ((ok: boolean) => void) | null;
 }
 
-const initial: ConfirmState = {
-  open: false,
-  title: '确认',
-  message: '',
-  confirmLabel: '确认',
-  danger: false,
-  resolve: null,
-};
-
 interface ConfirmActions {
+  /** 私有：当前 pending 的回调（不进 state，避免序列化/外部读到 pending 函数） */
+  resolve: ((ok: boolean) => void) | null;
   confirm: (opts: {
     title?: string;
     message: string;
@@ -29,8 +21,17 @@ interface ConfirmActions {
   onCancel: () => void;
 }
 
+const initial: ConfirmState = {
+  open: false,
+  title: '确认',
+  message: '',
+  confirmLabel: '确认',
+  danger: false,
+};
+
 export const useConfirmStore = create<ConfirmState & ConfirmActions>((set, get) => ({
   ...initial,
+  resolve: null,
   confirm: (opts) =>
     new Promise<boolean>((resolve) => {
       set({
@@ -44,10 +45,20 @@ export const useConfirmStore = create<ConfirmState & ConfirmActions>((set, get) 
     }),
   onConfirm: () => {
     get().resolve?.(true);
-    set({ ...initial });
+    set({ ...initial, resolve: null });
   },
   onCancel: () => {
     get().resolve?.(false);
-    set({ ...initial });
+    set({ ...initial, resolve: null });
   },
 }));
+
+/** 便捷调用（不需要 hook subscribe 时也能用） */
+export async function confirmDialog(opts: {
+  title?: string;
+  message: string;
+  confirmLabel?: string;
+  danger?: boolean;
+}): Promise<boolean> {
+  return useConfirmStore.getState().confirm(opts);
+}

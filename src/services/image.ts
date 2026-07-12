@@ -26,22 +26,34 @@ const MAX_TEXT_INLINE = 64 * 1024;       // 文本内联限制 64KB
 const IMAGE_TYPES = ['image/png', 'image/jpeg', 'image/jpg', 'image/webp', 'image/gif'];
 const TEXT_EXT = /\.(txt|md|markdown|json|ya?ml|toml|csv|tsv|log|env|ini|conf|html?|css|scss|less|js|jsx|ts|tsx|vue|svelte|py|pyi|rb|rs|go|java|kt|swift|c|h|cc|cpp|hpp|cs|php|sh|bash|zsh|sql|yaml|xml|tex|org|mdx|mmd|ino|dart|lua|pl|r|jl|ex|exs|clj|cljs|edn|scala|groovy|tf|dockerfile|gitignore|gitattributes|editorconfig|properties|gradle|cmake|asm|s|asmx)$/i;
 
-function tooBig(name: string, size: number): boolean {
+export interface AttachmentPickOptions {
+  /** 当命中"过大/过多/不支持"时回调，由调用方决定 UI 提示方式（toast / alert） */
+  onWarn?: (msg: string) => void;
+}
+
+function warn(opts: AttachmentPickOptions | undefined, msg: string) {
+  if (opts?.onWarn) opts.onWarn(msg);
+}
+
+function tooBig(name: string, size: number, opts?: AttachmentPickOptions): boolean {
   if (size > MAX_SINGLE) {
-    alert(`文件 ${name} 超过 8MB，已跳过`);
+    warn(opts, `文件 ${name} 超过 8MB，已跳过`);
     return true;
   }
   return false;
 }
 
-export async function pickAttachments(files: FileList | File[]): Promise<Attachment[]> {
+export async function pickAttachments(
+  files: FileList | File[],
+  opts?: AttachmentPickOptions,
+): Promise<Attachment[]> {
   const out: Attachment[] = [];
   for (const f of Array.from(files)) {
     if (out.length >= MAX_TOTAL_FILES) {
-      alert(`一次最多上传 ${MAX_TOTAL_FILES} 个文件`);
+      warn(opts, `一次最多上传 ${MAX_TOTAL_FILES} 个文件`);
       break;
     }
-    if (tooBig(f.name, f.size)) continue;
+    if (tooBig(f.name, f.size, opts)) continue;
 
     if (IMAGE_TYPES.includes(f.type)) {
       out.push(makeImageAttachment(f));
@@ -50,7 +62,7 @@ export async function pickAttachments(files: FileList | File[]): Promise<Attachm
     } else if (f.type.startsWith('text/') || TEXT_EXT.test(f.name)) {
       out.push(await makeTextAttachment(f));
     } else {
-      alert(`不支持的文件类型：${f.name}（仅支持 图片 / PDF / 常见文本 / 代码）`);
+      warn(opts, `不支持的文件类型：${f.name}（仅支持 图片 / PDF / 常见文本 / 代码）`);
     }
   }
   return out;

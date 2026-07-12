@@ -8,6 +8,8 @@ import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
 import { clsx } from 'clsx';
 import { isEncryptionEnabled } from '@/services/crypto';
+import { toast } from '@/store/toastStore';
+import { confirmDialog } from '@/store/confirmStore';
 
 /**
  * 国内主流厂商预设。
@@ -193,7 +195,7 @@ export function ProviderManager() {
   const save = async () => {
     if (!editing) return;
     if (!editing.name.trim() || !editing.baseUrl.trim()) {
-      alert('名称和 Base URL 不能为空');
+      toast.error('名称和 Base URL 不能为空');
       return;
     }
     await providerRepo.upsert(editing);
@@ -201,7 +203,13 @@ export function ProviderManager() {
   };
 
   const remove = async (id: string) => {
-    if (!confirm('确认删除该 Provider？')) return;
+    const ok = await confirmDialog({
+      title: '删除 Provider',
+      message: '确认删除该 Provider？已有的会话不受影响，但该 Provider 下的模型将不再可选。',
+      confirmLabel: '删除',
+      danger: true,
+    });
+    if (!ok) return;
     await providerRepo.delete(id);
   };
 

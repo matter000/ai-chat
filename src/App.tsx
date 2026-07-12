@@ -10,6 +10,8 @@ import { CommandPalette } from '@/components/CommandPalette';
 import { AuthScreen } from '@/components/AuthScreen';
 import { GlobalSearch } from '@/components/GlobalSearch';
 import { UserCenter } from '@/components/settings/UserCenter';
+import { ConfirmDialog } from '@/components/ui/ConfirmDialog';
+import { Toaster } from '@/components/ui/Toaster';
 import { Button } from '@/components/ui/Button';
 import { clsx } from 'clsx';
 import { useUIStore, applyTheme } from '@/store/uiStore';
@@ -297,6 +299,8 @@ export default function App() {
         onClose={() => setUserCenterOpen(false)}
         onLogout={handleLogout}
       />
+      <ConfirmDialog />
+      <Toaster />
     </div>
   );
 }

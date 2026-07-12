@@ -12,6 +12,7 @@ import {
 import { renderPrompt } from '@/services/promptRender';
 import { promptRepo } from '@/db';
 import { intakeFromDataTransfer, type IntakeProgress } from '@/services/fileIntake';
+import { toast } from '@/store/toastStore';
 import { PromptPicker } from './PromptPicker';
 
 interface Props {
@@ -46,9 +47,9 @@ export function ChatInput({ onSend, onStop, streaming, pending, placeholder }: P
 
   const addFiles = useCallback(async (rawFiles: File[]) => {
     if (!rawFiles?.length) return;
-    const picked = await pickAttachments(rawFiles);
+    const picked = await pickAttachments(rawFiles, { onWarn: (m) => toast.error(m) });
     if (!picked.length) {
-      alert('所选文件类型不被支持');
+      toast.error('所选文件类型不被支持');
       return;
     }
     setAttachments((prev) => [...prev, ...picked]);

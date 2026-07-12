@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/Button';
 import { Input, Textarea } from '@/components/ui/Input';
 import { nanoid } from 'nanoid';
 import { clsx } from 'clsx';
+import { toast } from '@/store/toastStore';
 
 const CATEGORIES: PromptTemplate['category'][] = ['通用', '写作', '编程', '翻译', '角色', '自定义'];
 
@@ -50,7 +51,7 @@ export function PromptManager() {
   const save = async () => {
     if (!editing) return;
     if (!editing.command.trim() || !editing.title.trim() || !editing.content.trim()) {
-      alert('命令、标题、内容不能为空');
+      toast.error('命令、标题、内容不能为空');
       return;
     }
     const command = editing.command.trim().toLowerCase().replace(/[^a-z0-9-]/g, '-');

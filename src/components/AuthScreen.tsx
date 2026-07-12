@@ -239,6 +239,7 @@ export function AuthScreen({ open, locked, onUnlocked }: Props) {
                 placeholder="you@example.com"
                 autoFocus={!isLocked}
                 disabled={isLocked}
+                autoComplete={isLocked ? 'username' : 'email'}
               />
             </label>
           )}
@@ -262,6 +263,7 @@ export function AuthScreen({ open, locked, onUnlocked }: Props) {
                 onChange={(e) => setPassword(e.target.value)}
                 placeholder="至少 6 位"
                 autoFocus={isLocked}
+                autoComplete={isLocked ? 'current-password' : 'new-password'}
               />
             </label>
           )}
@@ -275,6 +277,7 @@ export function AuthScreen({ open, locked, onUnlocked }: Props) {
                   value={confirmPw}
                   onChange={(e) => setConfirmPw(e.target.value)}
                   placeholder="再次输入密码"
+                  autoComplete="new-password"
                 />
               </label>
               <label className="block text-[11px]">

@@ -304,6 +304,7 @@ export function ChatView({ conversationId, onOpenSettings, highlightMessageId }:
       .map((m) => ({ role: m.role as 'user' | 'assistant', content: m.content }));
     // 重新生成
     setError(null);
+    setPending(false);
     setStreamedText('');
     const ac = new AbortController();
     abortRef.current = ac;
@@ -394,6 +395,7 @@ export function ChatView({ conversationId, onOpenSettings, highlightMessageId }:
     });
 
     setError(null);
+    setPending(false);
     setStreamedText('');
     setAutoScroll(true);
     const ac = new AbortController();

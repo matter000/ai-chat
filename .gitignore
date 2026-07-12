@@ -6,4 +6,4 @@ dist-ssr
 .DS_Store
 .env*
 !.env.example
-*.log
+*.log.playwright-mcp/
